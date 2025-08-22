@@ -1,10 +1,15 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///./crm.db"
+# Get DB URL from environment (default to local SQLite)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crm.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# SQLite needs special argument, others (Postgres/MySQL) don’t
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -14,4 +19,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
