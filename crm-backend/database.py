@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get DATABASE_URL from environment, fallback to SQLite if not set
-DATABASE_URL = postgresql://crm_db_g77o_user:5yQKgcnc0uKdIQGaMiIdAhn8vKSGSHvE@dpg-d2kbpte3jp1c7382k8g0-a:5432/crm-db
+DATABASE_URL = "postgresql://crm_db_g77o_user:5yQKgcnc0uKdIQGaMiIdAhn8vKSGSHvE@dpg-d2kbpte3jp1c7382k8g0-a:5432/crm-db"
 
 # If using SQLite, need connect_args
 if DATABASE_URL.startswith("sqlite"):
