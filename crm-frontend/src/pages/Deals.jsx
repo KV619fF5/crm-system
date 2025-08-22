@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"; // fallback for local dev
+
 function Deals() {
   const [deals, setDeals] = useState([]);
   const [form, setForm] = useState({
@@ -19,7 +21,7 @@ function Deals() {
 
   const fetchDeals = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/deals/");
+      const res = await axios.get(`${API_URL}/deals/`);
       setDeals(res.data);
     } catch (err) {
       console.error("Error fetching deals:", err);
@@ -28,7 +30,7 @@ function Deals() {
 
   const fetchCustomers = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/customers/");
+      const res = await axios.get(`${API_URL}/customers/`);
       setCustomers(res.data);
     } catch (err) {
       console.error("Error fetching customers:", err);
@@ -52,11 +54,11 @@ function Deals() {
     try {
       if (editingId) {
         // Edit existing deal
-        await axios.put(`http://127.0.0.1:8000/deals/${editingId}`, payload);
+        await axios.put(`${API_URL}/deals/${editingId}`, payload);
         setEditingId(null);
       } else {
         // Add new deal
-        await axios.post("http://127.0.0.1:8000/deals/", payload);
+        await axios.post(`${API_URL}/deals/`, payload);
       }
       setForm({ deal_name: "", value: "", stage: "Negotiation", customer_id: "" });
       fetchDeals();
@@ -68,7 +70,7 @@ function Deals() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/deals/${id}`);
+      await axios.delete(`${API_URL}/deals/${id}`);
       fetchDeals();
     } catch (err) {
       console.error("Failed to delete deal:", err.response?.data || err.message);
