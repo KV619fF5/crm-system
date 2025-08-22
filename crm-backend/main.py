@@ -9,7 +9,7 @@ from database import engine, Base, get_db
 app = FastAPI(title="CRM Backend")
 
 # --- CORS ---
-origins = ["https://yourfrontend.com", "http://localhost:3000"]
+origins = ["https://crm-system-ashen.vercel.app", "http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
