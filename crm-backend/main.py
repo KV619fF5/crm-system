@@ -10,18 +10,17 @@ app = FastAPI(title="CRM Backend")
 
 # --- CORS ---
 origins = [
-    "https://crm-system-ashen.vercel.app",  # your deployed frontend
-    "http://localhost:3000"                  # local dev frontend
+    "https://crm-system-ashen.vercel.app",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # allow exact frontend URLs
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],  # GET, POST, PUT, DELETE, OPTIONS
     allow_headers=["*"],
 )
-
 # --- DB ---
 Base.metadata.create_all(bind=engine)
 
