@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// ✅ Use backend API URL from environment variable
+const API_URL = process.env.REACT_APP_API_URL;
+
 export default function Register({ setUser }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -37,17 +40,15 @@ export default function Register({ setUser }) {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://127.0.0.1:8000/register/", { username, email, password });
-      
+      // ✅ Call backend using environment variable
+      await axios.post(`${API_URL}/register/`, { username, email, password });
+
       alert("Account created successfully! Please login.");
 
-      // Optional: auto-login after registration
-      // localStorage.setItem("token", res.data.email); // replace with actual token if backend provides
-      // setUser(res.data);
-      // navigate("/");
-
-      // Redirect to login page
+      // 👉 After registration, redirect to login page
       navigate("/login");
+
+      // Reset form
       setForm({ username: "", email: "", password: "" });
     } catch (err) {
       console.error(err.response?.data || err.message);
