@@ -64,7 +64,8 @@ export default function Login({ setUser }) {
   bg-gradient-to-br from-purple-800 via-purple-600 to-purple-800">
   <form
     onSubmit={handleSubmit}
-    className="bg-white/30 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-xl w-full max-w-md"
+    className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md"
+
   >
     <h2 className="text-3xl font-bold mb-6 text-center text-black drop-shadow-lg">
       {isRegister ? "Register Here" : "Welcome to CRM System Login Page"}
