@@ -11,7 +11,9 @@ app = FastAPI(title="CRM Backend")
 # --- CORS ---
 origins = [
     "https://crm-system-ashen.vercel.app",
-    "http://localhost:3000"
+    "https://crm-system-git-main-kv619ff5s-projects.vercel.app",
+    "https://crm-system-dhi52dehj-kv619ff5s-projects.vercel.app",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
