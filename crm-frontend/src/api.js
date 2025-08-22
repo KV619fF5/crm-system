@@ -1,44 +1,31 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://127.0.0.1:8000", // backend URL
-  timeout: 5000,
-});
-
-API.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response) {
-      console.error("Backend error:", error.response.data);
-    } else if (error.request) {
-      console.error("No response from server:", error.message);
-    } else {
-      console.error("Axios error:", error.message);
-    }
-    return Promise.reject(error);
-  }
-);
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 // --- Customers ---
-export const getCustomers = async () => API.get("/customers/");
-export const createCustomer = async (data) => API.post("/customers/", data);
-export const updateCustomer = async (id, data) => API.put(`/customers/${id}`, data);
-export const deleteCustomer = async (id) => API.delete(`/customers/${id}`);
+export const getCustomers = () => axios.get(`${API_URL}/customers/`);
+export const createCustomer = (data) => axios.post(`${API_URL}/customers/`, data);
+export const updateCustomer = (id, data) => axios.put(`${API_URL}/customers/${id}/`, data);
+export const deleteCustomer = (id) => axios.delete(`${API_URL}/customers/${id}/`);
 
 // --- Activities ---
-export const getActivities = async () => API.get("/activities/");
-export const createActivity = async (data) => API.post("/activities/", data);
-export const updateActivity = async (id, data) => API.put(`/activities/${id}`, data);
-export const deleteActivity = async (id) => API.delete(`/activities/${id}`);
+export const getActivities = () => axios.get(`${API_URL}/activities/`);
+export const createActivity = (data) => axios.post(`${API_URL}/activities/`, data);
+export const updateActivity = (id, data) => axios.put(`${API_URL}/activities/${id}/`, data);
+export const deleteActivity = (id) => axios.delete(`${API_URL}/activities/${id}/`);
+
+// --- Leads ---
+export const getLeads = () => axios.get(`${API_URL}/leads/`);
+export const createLead = (data) => axios.post(`${API_URL}/leads/`, data);
+export const updateLead = (id, data) => axios.put(`${API_URL}/leads/${id}/`, data);
+export const deleteLead = (id) => axios.delete(`${API_URL}/leads/${id}/`);
 
 // --- Deals ---
-export const getDeals = async () => API.get("/deals/");
-export const createDeal = async (data) => API.post("/deals/", data);
-export const updateDeal = async (id, data) => API.put(`/deals/${id}`, data);
-export const deleteDeal = async (id) => API.delete(`/deals/${id}`);
+export const getDeals = () => axios.get(`${API_URL}/deals/`);
+export const createDeal = (data) => axios.post(`${API_URL}/deals/`, data);
+export const updateDeal = (id, data) => axios.put(`${API_URL}/deals/${id}/`, data);
+export const deleteDeal = (id) => axios.delete(`${API_URL}/deals/${id}/`);
 
-// --- Leads (NEW) ---
-export const getLeads = async () => API.get("/leads/");
-export const createLead = async (data) => API.post("/leads/", data);
-export const updateLead = async (id, data) => API.put(`/leads/${id}`, data);
-export const deleteLead = async (id) => API.delete(`/leads/${id}`);
+// --- Auth ---
+export const login = (data) => axios.post(`${API_URL}/login/`, data);
+export const register = (data) => axios.post(`${API_URL}/register/`, data);
