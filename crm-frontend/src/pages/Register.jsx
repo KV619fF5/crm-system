@@ -2,29 +2,26 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// ✅ Use backend API URL from environment variable
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Register({ setUser }) {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
-
-  // Alert state
-  const [alert, setAlert] = useState({ message: "", type: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const validatePassword = (password) => {
+    // Minimum 8 characters, at least one letter and one number
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     return regex.test(password);
-  };
-
-  // Function to show alert
-  const showAlert = (message, type = "info") => {
-    setAlert({ message, type });
-    setTimeout(() => setAlert({ message: "", type: "" }), 4000); // auto-hide after 4s
   };
 
   const handleSubmit = async (e) => {
@@ -32,50 +29,37 @@ export default function Register({ setUser }) {
     const { username, email, password } = form;
 
     if (!username || !email || !password) {
-      showAlert("Please fill all fields.", "error");
+      alert("Please fill all fields.");
       return;
     }
 
     if (!validatePassword(password)) {
-      showAlert(
-        "Password must be at least 8 characters and contain at least one number and one letter.",
-        "error"
-      );
+      alert("Password must be at least 8 characters and contain at least one number and one letter.");
       return;
     }
 
     setLoading(true);
     try {
+      // ✅ Call backend using environment variable
       await axios.post(`${API_URL}/register/`, { username, email, password });
 
-      showAlert("Account created successfully! Please login.", "success");
+      alert("Account created successfully! Please login.");
 
+      // 👉 After registration, redirect to login page
+      navigate("/login");
+
+      // Reset form
       setForm({ username: "", email: "", password: "" });
-
-      setTimeout(() => navigate("/login"), 1500); // redirect after alert
     } catch (err) {
       console.error(err.response?.data || err.message);
-      showAlert(err.response?.data?.detail || "Registration failed. Check console.", "error");
+      alert(err.response?.data?.detail || "Registration failed. Check console for details.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-blue-50 relative">
-      {/* Alert Box */}
-      {alert.message && (
-        <div
-          className={`absolute top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold
-          ${alert.type === "success" ? "bg-green-500" : ""}
-          ${alert.type === "error" ? "bg-red-500" : ""}
-          ${alert.type === "info" ? "bg-blue-500" : ""}
-          transition-all duration-500`}
-        >
-          {alert.message}
-        </div>
-      )}
-
+    <div className="flex justify-center items-center min-h-screen bg-blue-50">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
@@ -117,7 +101,7 @@ export default function Register({ setUser }) {
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition-all duration-300"
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700"
           disabled={loading}
         >
           {loading ? "Creating Account..." : "Register"}
@@ -126,3 +110,4 @@ export default function Register({ setUser }) {
     </div>
   );
 }
+can you do the same for this
