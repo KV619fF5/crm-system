@@ -110,4 +110,3 @@ export default function Register({ setUser }) {
     </div>
   );
 }
-can you do the same for this
