@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -9,11 +9,14 @@ from database import engine, Base, get_db
 app = FastAPI(title="CRM Backend")
 
 # --- CORS ---
-origins = ["https://crm-system-ashen.vercel.app", "http://localhost:3000"]
+origins = [
+    "https://crm-system-ashen.vercel.app",  # your deployed frontend
+    "http://localhost:3000"                  # local dev frontend
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,         # allow exact frontend URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,16 +34,24 @@ def hash_password(password: str):
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-# =============== Users (Login/Register) ===============
+# --- Test endpoint for CORS ---
+@app.get("/test-cors")
+def test_cors():
+    return {"message": "CORS is working!"}
+
+# =============== Users ===============
 @app.post("/register/", response_model=schemas.UserOut)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
-    
-    hashed_password = hash_password(user.password)
-    db_user = models.User(username=user.username, email=user.email, password=hashed_password)
+
+    db_user = models.User(
+        username=user.username,
+        email=user.email,
+        password=hash_password(user.password)
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -49,19 +60,17 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @app.post("/login/", response_model=schemas.UserOut)
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if not db_user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    if not verify_password(user.password, db_user.password):
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return db_user
 
-# ----------------- Helper -----------------
+# ---------------- Helper ----------------
 def get_customer_or_404(db: Session, customer_id: int):
     if customer_id is None:
         raise HTTPException(status_code=400, detail="customer_id is required")
     cust = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
     if not cust:
-        raise HTTPException(status_code=400, detail="Invalid customer_id")
+        raise HTTPException(status_code=404, detail="Customer not found")
     return cust
 
 # =============== Customers ===============
@@ -69,11 +78,7 @@ def get_customer_or_404(db: Session, customer_id: int):
 def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
     db_customer = models.Customer(**customer.dict())
     db.add(db_customer)
-    try:
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
+    db.commit()
     db.refresh(db_customer)
     return db_customer
 
@@ -83,16 +88,11 @@ def read_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
 
 @app.get("/customers/{customer_id}", response_model=schemas.Customer)
 def read_customer(customer_id: int, db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    return customer
+    return get_customer_or_404(db, customer_id)
 
 @app.put("/customers/{customer_id}", response_model=schemas.Customer)
 def update_customer(customer_id: int, updated: schemas.CustomerUpdate, db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+    customer = get_customer_or_404(db, customer_id)
     for key, value in updated.dict(exclude_unset=True).items():
         setattr(customer, key, value)
     db.commit()
@@ -101,9 +101,7 @@ def update_customer(customer_id: int, updated: schemas.CustomerUpdate, db: Sessi
 
 @app.delete("/customers/{customer_id}")
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+    customer = get_customer_or_404(db, customer_id)
     db.delete(customer)
     db.commit()
     return {"detail": "Customer deleted"}
@@ -150,7 +148,6 @@ def delete_activity(activity_id: int, db: Session = Depends(get_db)):
     db.delete(activity)
     db.commit()
     return {"detail": "Activity deleted"}
-
 # =============== Leads ===============
 @app.post("/leads/", response_model=schemas.Lead)
 def create_lead(lead: schemas.LeadCreate, db: Session = Depends(get_db)):
